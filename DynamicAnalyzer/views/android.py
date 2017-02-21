@@ -115,10 +115,11 @@ def GetEnv(request):
                 PORT = str(settings.PORT)  # Proxy Port
                 WebProxy(APP_DIR, PROXY_IP, PORT)
                 Connect(TOOLS_DIR)
+                SCREEN_WIDTH, SCREEN_HEIGHT = GetRes()
                 # Change True to support non-activity components
                 InstallRun(TOOLS_DIR, APP_PATH, PKG, LNCH, True)
                 RunFridaServer(TOOLS_DIR, settings.FRIDA_SERVER)
-                SCREEN_WIDTH, SCREEN_HEIGHT = GetRes()
+                
                 Wait(10)
                 #Frida Related
                 frida_device_identifier = get_vm(getIdentifier(), settings.FRIDA_DEVICE_TYPE)
@@ -126,15 +127,17 @@ def GetEnv(request):
                 f_pid = create_app_session(f_device, PKG)
                 script_content ='''
                 setTimeout(function(){
-                Dalvik.perform(function () {
-                    var TM = Dalvik.use("android.os.Debug");
-                    TM.isDebuggerConnected.implementation = function () {
-                                send("Called - isDebuggerConnected()");
-                            return false;
-                    };
+                    Java.perform(function () {
+                        var TM = Java.use("%s");
+                        TM.isEmulator.implementation = function () {
+                            send("Fool Root");
+                            return true;
+                        };
+
                     });
+
                 },0);
-                '''
+                ''' % PKG
                 execute_script(f_device, PKG, f_pid, script_content)
                 apps_on_device = get_apps(f_device)
                 process_running = get_process(f_device)
@@ -749,6 +752,7 @@ def InstallRun(TOOLSDIR, APKPATH, PACKAGE, LAUNCH, isACT):
         adb = getADB(TOOLSDIR)
         print "\n[INFO] Installing APK"
         subprocess.call([adb, "-s", getIdentifier(), "install", "-r", APKPATH])
+        '''
         if isACT:
             runApp = PACKAGE + "/" + LAUNCH
             print "\n[INFO] Launching APK Main Activity"
@@ -758,6 +762,7 @@ def InstallRun(TOOLSDIR, APKPATH, PACKAGE, LAUNCH, isACT):
             print "\n[INFO] App Doesn't have a Main Activity"
             # Handle Service or Give Choice to Select in Future.
             pass
+        '''
         print "[INFO] Testing Environment is Ready!"
     except:
         PrintException("[ERROR]  Starting App for Dynamic Analysis")
