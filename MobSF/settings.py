@@ -298,7 +298,10 @@ else:
     See the source code of the cloud server from APITester/cloud/cloud_server.py
     You can also host the cloud server. Host it on a public IP and point CLOUD_SERVER to that IP.
     '''
-
+    #===============FRIDA SETTINGS==================
+    #Common for VM or Device
+    FRIDA_SERVER = 'frida-server-9.1.7-android-i386'
+    FRIDA_DEVICE_TYPE = 'tether' #'remote'
     #===============DEVICE SETTINGS=================
     REAL_DEVICE = False
     DEVICE_IP = '192.168.1.18'
@@ -308,9 +311,9 @@ else:
     #================VM SETTINGS ===================
 
     # VM UUID
-    UUID = '408e1874-759f-4417-9453-53ef21dc2ade'
+    UUID = '282b3b15-9fbc-4fc9-bb05-a4554298e80b'
     # Snapshot UUID
-    SUUID = '5c9deb28-def6-49c0-9233-b5e03edd85c6'
+    SUUID = 'c482d73d-1565-4195-a8c3-33efd595a2b7'
     # IP of the MobSF VM
     VM_IP = '192.168.56.101'
     VM_ADB_PORT = 5555

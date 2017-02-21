@@ -23,6 +23,7 @@ from django.utils.html import escape
 
 from StaticAnalyzer.models import StaticAnalyzerAndroid
 from DynamicAnalyzer.pyWebProxy.pywebproxy import *
+from DynamicAnalyzer.views.android_frida import *
 from MobSF.utils import PrintException, is_number, python_list, isBase64, isFileExists, getADB
 from MalwareAnalyzer.views import MalwareCheck
 
@@ -116,10 +117,33 @@ def GetEnv(request):
                 Connect(TOOLS_DIR)
                 # Change True to support non-activity components
                 InstallRun(TOOLS_DIR, APP_PATH, PKG, LNCH, True)
+                RunFridaServer(TOOLS_DIR, settings.FRIDA_SERVER)
                 SCREEN_WIDTH, SCREEN_HEIGHT = GetRes()
+                Wait(10)
+                #Frida Related
+                frida_device_identifier = get_vm(getIdentifier(), settings.FRIDA_DEVICE_TYPE)
+                f_device = frida_connect(frida_device_identifier)
+                f_pid = create_app_session(f_device, PKG)
+                script_content ='''
+                setTimeout(function(){
+                Dalvik.perform(function () {
+                    var TM = Dalvik.use("android.os.Debug");
+                    TM.isDebuggerConnected.implementation = function () {
+                                send("Called - isDebuggerConnected()");
+                            return false;
+                    };
+                    });
+                },0);
+                '''
+                execute_script(f_device, PKG, f_pid, script_content)
+                apps_on_device = get_apps(f_device)
+                process_running = get_process(f_device)
                 data = {'ready': 'yes',
                         'screen_witdth': SCREEN_WIDTH,
-                        'screen_height': SCREEN_HEIGHT, }
+                        'screen_height': SCREEN_HEIGHT,
+                        'apps' : str(apps_on_device),
+                        'processes' : str(process_running)
+                       }
                 return HttpResponse(json.dumps(data), content_type='application/json')
             else:
                 return HttpResponseRedirect('/error/')
@@ -738,6 +762,16 @@ def InstallRun(TOOLSDIR, APKPATH, PACKAGE, LAUNCH, isACT):
     except:
         PrintException("[ERROR]  Starting App for Dynamic Analysis")
 
+
+def RunFridaServer(tools_dir, frida_server):
+    """Invoke Frida Server in VM/Device"""
+    print "\n[INFO] Starting Frida Server"
+    try:
+        adb = getADB(tools_dir)
+        subprocess.Popen([adb, '-s', getIdentifier(), 'shell', 'su', '-c', '/data/local/tmp/'+frida_server, '&'])
+        Wait(3)
+    except:
+        PrintException("[ERROR] Running Frida Server in the Device/VM")
 
 def HandleSqlite(SFile):
     print "\n[INFO] SQLite DB Extraction"

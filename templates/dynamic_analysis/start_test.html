@@ -88,6 +88,8 @@ textarea:focus {
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">VM Status</a></li>
               <li><a href="#tab_2" data-toggle="tab">Errors</a></li>
+              <li><a href="#tab_3" data-toggle="tab">Running Processes</a></li>
+              <li><a href="#tab_4" data-toggle="tab">Apps Installed</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
@@ -101,6 +103,16 @@ textarea:focus {
               <div class="tab-pane" id="tab_2"> 
               <iframe sandbox frameborder="0" width="100%" height="650px" id="er"></iframe>
               </div>
+
+              <div id="processes" class="tab-pane" id="tab_3"> 
+              <code> </code>
+              </div>
+
+              <div id="apps" class="tab-pane" id="tab_4"> 
+             <pre>  </pre>
+              </div>
+
+
             </div>
             <!-- /.tab-content -->
           </div>
