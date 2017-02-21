@@ -1,5 +1,6 @@
 Django==1.10.5
 pyOpenSSL
+frida==9.1.7
 tornado==4.4.2
 xhtml2pdf==0.0.6
 html5lib==1.0b8
